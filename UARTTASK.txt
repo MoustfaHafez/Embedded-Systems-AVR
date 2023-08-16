@@ -1,0 +1,115 @@
+ u8 MessagFromUART[20];
+ u8 StrMessage[10];
+ u8 NumMessage=0;
+ u8 static flag1=0;
+ 
+typedef struct 
+{
+	 u8 *str,
+	(*pf)(u8)
+	 
+}UARTTASK_Type;
+
+
+
+		
+	void LEDONN(u8 num)
+	{
+		switch(num)
+		{
+			case 0:
+			DIO_VidWritePin(PINC0,High);
+			break;
+			case 1:
+			DIO_VidWritePin(PINC1,High);
+			break;
+			case 2:
+			DIO_VidWritePin(PINC2,High);
+			break;
+			
+		}
+	}
+
+
+void LEDOFFF(u8 num)	
+{
+	switch (num)
+	{
+		case 0:
+		DIO_VidWritePin(PINC0,Low);
+		break;
+		case 1:
+		DIO_VidWritePin(PINC1,Low);
+		break;
+		case 2:
+		DIO_VidWritePin(PINC2,Low);
+		break;
+		
+	}
+}
+UARTTASK_Type arr[2]={{"LEDON",&LEDONN},{"LEDOFF",&LEDOFFF}};
+
+
+int main()
+{
+
+while(1)
+        LCDGoTo(0,0);
+		UART_VoidReadString(MessagFromUART);
+		LCD_WriteString(MessagFromUART);
+		LCD_WriteString("          ");
+		
+		for(u8 i=0;MessagFromUART[i];i++)
+		{
+			if(MessagFromUART[i]!=' '&& flag1!=1)
+			{
+				StrMessage[i]=MessagFromUART[i];
+			}
+			else
+			{
+				if(MessagFromUART[i]==' ')
+				{
+					flag1=1;
+					StrMessage[i]=0;
+					continue;
+				}
+				
+				NumMessage=NumMessage*10+(MessagFromUART[i]-'0');		
+			}
+		}
+	    LCDGoTo(1,0);
+		LCD_WriteNumber(NumMessage);
+		LCD_WriteString("                                  ");
+		
+		/*LCDGoTo(1,0);
+		LCD_WriteString(StrMessage);
+        LCDGoTo(1,7);
+		LCD_WriteString("   ");
+		LCD_WriteNumber(NumMessage);
+		
+		LCDGoTo(1,0);*/
+		
+
+			
+
+		
+		for(u8 i=0;i<2;i++)
+		{
+			if(CompareString(StrMessage,arr[i].str))
+			{
+				arr[i].pf(NumMessage);
+			}
+			else
+			{
+				//LCD_WriteString("ERROR MESSAGE");
+				LCD_WriteChar('a');
+			}
+		}
+		
+		
+		flag1=0;
+		NumMessage=0;
+		
+
+}
+
